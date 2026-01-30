@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Mon Agenda</title>
+<link rel="manifest" href="manifest.json">
+
+<style>
+  body { font-family: sans-serif; max-width: 600px; margin: 20px auto; }
+  input, textarea { width: 100%; margin: 5px 0; }
+  .event { padding: 10px; border: 1px solid #ccc; margin: 10px 0; }
+  .past {
+  background-color: #ffdddd;
+  border-color: #fd7474;
+}
+
+.future {
+  background-color: #ddffdd;
+  border-color: #3ce93c;
+}
+.today {
+  background-color: #ddeaff;
+  border-color: #0a5bf0;
+}
+
+</style>
+<script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("service-worker.js");
+  }
+</script>
+
+</head>
+<body>
+
+<h1>Mon Agenda</h1>
+<p><button id="gotoToday">Aller à aujourd'hui</button></p>
+
+<label>Date :</label>
+<input type="date" id="date">
+
+<label>Heure :</label>
+<input type="time" id="time">
+
+<label>Note :</label>
+<textarea id="note"></textarea>
+
+<button id="add">Ajouter</button>
+
+<h2>Événements</h2>
+<div id="events"></div>
+
+<script>
+  const events = JSON.parse(localStorage.getItem("agenda") || "[]");
+
+  function render() {
+    const container = document.getElementById("events");
+    container.innerHTML = "";
+    events.forEach((ev, i) => {
+      const div = document.createElement("div");
+      div.className = "event";
+      div.innerHTML = `
+        <strong>${ev.date} à ${ev.time}</strong><br>
+        ${ev.note}<br>
+        <button onclick="removeEvent(${i})">Supprimer</button>
+      `;
+      container.appendChild(div);
+    });
+  }
+
+  function removeEvent(i) {
+    events.splice(i, 1);
+    localStorage.setItem("agenda", JSON.stringify(events));
+    render();
+  }
+
+  document.getElementById("add").onclick = () => {
+    const date = document.getElementById("date").value;
+    const time = document.getElementById("time").value;
+    const note = document.getElementById("note").value;
+    if (!date || !time || !note) return;
+
+    events.push({ date, time, note });
+    localStorage.setItem("agenda", JSON.stringify(events));
+    render();
+  };
+
+  render();
+function render() {
+  const container = document.getElementById("events");
+  container.innerHTML = "";
+
+  // TRI CHRONOLOGIQUE
+  events.sort((a, b) => {
+    const da = new Date(a.date + " " + a.time);
+    const db = new Date(b.date + " " + b.time);
+    return da - db;
+  });
+
+  const now = new Date();
+  const todayStr = now.toISOString().split("T")[0];
+
+  let currentDate = null;
+
+  events.forEach((ev, i) => {
+    // Si on change de date → on affiche un titre
+    if (ev.date !== currentDate) {
+  currentDate = ev.date;
+
+  const title = document.createElement("h3");
+
+  if (ev.date === todayStr) {
+    title.textContent = "Aujourd'hui";
+    title.setAttribute("data-date", "today");
+  } else {
+    title.textContent = formatDate(ev.date, todayStr);
+  }
+
+  container.appendChild(title);
+}
+
+
+    const div = document.createElement("div");
+    div.className = "event";
+
+    const eventDate = new Date(ev.date + " " + ev.time);
+
+    // COULEURS
+    if (ev.date === todayStr) {
+      div.classList.add("today");
+    } else if (eventDate < now) {
+      div.classList.add("past");
+    } else {
+      div.classList.add("future");
+    }
+
+    div.innerHTML = `
+      <strong>${ev.time}</strong> — ${ev.note}<br>
+      <button onclick="removeEvent(${i})">Supprimer</button>
+    `;
+
+    container.appendChild(div);
+  });
+}
+
+// Petite fonction pour afficher joliment la date
+function formatDate(dateStr, todayStr) {
+  if (dateStr === todayStr) return "Aujourd'hui";
+
+  const d = new Date(dateStr);
+  return d.toLocaleDateString("fr-FR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  });
+}
+document.getElementById("gotoToday").onclick = () => {
+  const todaySection = document.querySelector("h3[data-date='today']");
+  if (todaySection) {
+    todaySection.scrollIntoView({ behavior: "smooth" });
+  } else {
+    alert("Aucun événement prévu aujourd'hui.");
+  }
+};
+
+</script>
+
+</body>
+</html>
