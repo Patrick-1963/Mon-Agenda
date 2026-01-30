@@ -12,7 +12,7 @@
     {
       "src": "agenda.webp",
       "sizes": "192x192",
-      "type": "image/webp",
+      "type": "icons - 192x192.jpg",
       "purpose": "any maskable"
     },
     {
@@ -37,7 +37,7 @@
       "url": "agenda.html#add",
       "icons": [
         {
-          "src": "agenda.webp",
+          "src": "icons - 192x192.png",
           "sizes": "192x192"
         }
       ]
@@ -56,5 +56,3 @@
     }
   ]
 }
-
-
