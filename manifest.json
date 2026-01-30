@@ -1,0 +1,21 @@
+{
+  "name": "Mon Agenda",
+  "short_name": "Agenda",
+  "start_url": "agenda.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "agenda.webp",
+      "sizes": "192x192",
+      "type": "image/webp"
+    },
+    {
+      "src": "agenda.webp",
+      "sizes": "512x512",
+      "type": "image/webp"
+    }
+  ]
+}
+
