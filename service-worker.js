@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agenda-pro-v3';
+const CACHE_NAME = 'agenda-pro-v4';
 const urlsToCache = [
   'agenda.html',
   'manifest.json',
@@ -105,4 +105,3 @@ function syncEvents() {
   // Logique de synchronisation future
   return Promise.resolve();
 }
-
