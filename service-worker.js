@@ -1,97 +1,97 @@
-const CACHE_NAME = 'agenda-pro-v5';
+const CACHE_NAME = 'agenda-pro-v6';
 const urlsToCache = [
   'agenda.html',
   'manifest.json',
+  '192x192.png',
+  '512x512.png',
   'agenda.webp'
 ];
 
-// Installation - mise en cache des fichiers
+// ─── Installation : mise en cache des fichiers ───────────────────────────────
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache ouvert');
-        return cache.addAll(urlsToCache);
-      })
+      .then(cache => cache.addAll(urlsToCache))
       .then(() => self.skipWaiting())
   );
 });
 
-// Activation - nettoyage des anciens caches
+// ─── Activation : nettoyage des anciens caches ───────────────────────────────
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
-            console.log('Suppression ancien cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    }).then(() => self.clients.claim())
+    caches.keys().then(cacheNames =>
+      Promise.all(
+        cacheNames
+          .filter(name => name !== CACHE_NAME)
+          .map(name => {
+            console.log('Suppression ancien cache :', name);
+            return caches.delete(name);
+          })
+      )
+    ).then(() => self.clients.claim())
   );
 });
 
-// Stratégie de récupération: Cache First, puis Network
+// ─── Stratégie : Cache First, puis réseau ────────────────────────────────────
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Cache hit - retourner la réponse du cache
-        if (response) {
+    caches.match(event.request).then(cached => {
+      if (cached) return cached;
+
+      return fetch(event.request).then(response => {
+        if (!response || response.status !== 200 || response.type !== 'basic') {
           return response;
         }
-
-        // Sinon, récupérer depuis le réseau
-        return fetch(event.request).then(
-          response => {
-            // Vérifier si la réponse est valide
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Cloner la réponse
-            const responseToCache = response.clone();
-
-            // Mettre en cache pour les prochaines fois
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          }
-        ).catch(() => {
-          // En cas d'erreur réseau, essayer de retourner une page par défaut
-          return caches.match('agenda.html');
-        });
-      })
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+        return response;
+      }).catch(() => caches.match('agenda.html'));
+    })
   );
 });
 
-// Écouter les événements push pour afficher une notification
-self.addEventListener('push', function(event) {
+// ─── Notifications push (depuis serveur) ─────────────────────────────────────
+self.addEventListener('push', event => {
+  if (!event.data) return;
   const data = event.data.json();
-  const options = {
-    body: data.body,
-    icon: '192x192.png',
-    badge: '192x192.png',
-    tag: 'agenda-notification',
-    requireInteraction: true
-  };
-
   event.waitUntil(
-    self.registration.showNotification(data.title, options)
+    self.registration.showNotification(data.title, {
+      body:              data.body || '',
+      icon:              '192x192.png',
+      badge:             '192x192.png',
+      tag:               data.tag || 'agenda-notification',
+      requireInteraction: true
+    })
   );
 });
 
-// Gérer les messages pour les notifications locales
+// ─── Notifications locales (depuis la page principale) ───────────────────────
 self.addEventListener('message', event => {
-  if (event.data.type === 'SHOW_NOTIFICATION') {
+  if (event.data && event.data.type === 'SHOW_NOTIFICATION') {
     self.registration.showNotification(
       event.data.title,
-      event.data.options
+      {
+        body:              event.data.options.body || '',
+        icon:              '192x192.png',
+        badge:             '192x192.png',
+        tag:               event.data.options.tag || 'agenda',
+        requireInteraction: event.data.options.requireInteraction || false
+      }
     );
   }
+});
+
+// ─── Clic sur une notification ───────────────────────────────────────────────
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(clientList => {
+      for (const client of clientList) {
+        if (client.url.includes('agenda.html') && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow('agenda.html');
+    })
+  );
 });

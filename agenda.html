@@ -1,24 +1,1079 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mon Agenda Pro</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#4F46E5">
+<style>
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .container {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    overflow: hidden;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    text-align: center;
+  }
+
+  .header h1 {
+    font-size: 2.5em;
+    margin-bottom: 10px;
+  }
+
+  .header-buttons {
+    margin-top: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+
+  .btn-primary {
+    background: #4F46E5;
+    color: white;
+  }
+
+  .btn-primary:hover {
+    background: #4338CA;
+    transform: translateY(-2px);
+  }
+
+  .btn-secondary {
+    background: white;
+    color: #4F46E5;
+  }
+
+  .btn-secondary:hover {
+    background: #F3F4F6;
+    transform: translateY(-2px);
+  }
+
+  .btn-danger {
+    background: #EF4444;
+    color: white;
+  }
+
+  .btn-danger:hover {
+    background: #DC2626;
+  }
+
+  .btn-success {
+    background: #10B981;
+    color: white;
+  }
+
+  .btn-success:hover {
+    background: #059669;
+  }
+
+  .btn-warning {
+    background: #F59E0B;
+    color: white;
+  }
+
+  .btn-warning:hover {
+    background: #D97706;
+  }
+
+  .hidden {
+    display: none !important;
+  }
+
+  .form-section {
+    padding: 30px;
+    background: #F9FAFB;
+    border-bottom: 1px solid #E5E7EB;
+  }
+
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 15px;
+  }
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  label {
+    font-weight: 600;
+    margin-bottom: 5px;
+    color: #374151;
+    font-size: 14px;
+  }
+
+  input, textarea, select {
+    padding: 12px;
+    border: 2px solid #E5E7EB;
+    border-radius: 8px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+  }
+
+  input:focus, textarea:focus, select:focus {
+    outline: none;
+    border-color: #4F46E5;
+  }
+
+  textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+
+  .form-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 15px;
+  }
+
+  .events-section {
+    padding: 30px;
+  }
+
+  .search-filter {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .search-filter input {
+    flex: 1;
+    min-width: 200px;
+  }
+
+  .date-separator {
+    background: #4F46E5;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 10px;
+    margin: 20px 0 15px 0;
+    font-weight: 600;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .date-separator.today {
+    background: #10B981;
+  }
+
+  .event {
+    background: white;
+    border: 2px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .event:hover {
+    border-color: #4F46E5;
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .event.past {
+    background-color: #FEF2F2;
+    border-color: #FCA5A5;
+    opacity: 0.8;
+  }
+
+  .event.future {
+    background-color: #F0FDF4;
+    border-color: #86EFAC;
+  }
+
+  .event.today {
+    background-color: #EFF6FF;
+    border-color: #60A5FA;
+    box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
+  }
+
+  .event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .event-time {
+    font-size: 1.2em;
+    font-weight: 700;
+    color: #1F2937;
+  }
+
+  .event-category {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+
+  .category-travail   { background: #DBEAFE; color: #1E40AF; }
+  .category-personnel { background: #FCE7F3; color: #9F1239; }
+  .category-sante     { background: #D1FAE5; color: #065F46; }
+  .category-loisirs   { background: #FEF3C7; color: #92400E; }
+  .category-autre     { background: #E5E7EB; color: #374151; }
+
+  .event-note {
+    color: #4B5563;
+    margin: 10px 0;
+    line-height: 1.6;
+  }
+
+  .event-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  .event-actions button {
+    padding: 8px 16px;
+    font-size: 13px;
+  }
+
+  .priority-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .priority-haute   { background: #EF4444; }
+  .priority-moyenne { background: #F59E0B; }
+  .priority-basse   { background: #10B981; }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 20px;
+  }
+
+  .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+  }
+
+  .stat-number {
+    font-size: 2em;
+    font-weight: 700;
+  }
+
+  .stat-label {
+    font-size: 0.9em;
+    opacity: 0.9;
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 20px;
+    padding: 30px;
+    max-width: 500px;
+    width: 100%;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+
+  .modal-header {
+    font-size: 1.5em;
+    font-weight: 700;
+    margin-bottom: 20px;
+    color: #1F2937;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 20px;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #9CA3AF;
+  }
+
+  .empty-state svg {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 20px;
+    opacity: 0.5;
+  }
+
+  /* Bandeau de permission notifications */
+  .notification-banner {
+    background: #FEF3C7;
+    border: 2px solid #F59E0B;
+    border-radius: 12px;
+    padding: 15px 20px;
+    margin: 20px 30px 0 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .notification-banner.hidden {
+    display: none;
+  }
+
+  .notification-status {
+    font-size: 13px;
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+    margin-top: 8px;
+    display: inline-block;
+  }
+
+  .notif-granted  { background: #D1FAE5; color: #065F46; }
+  .notif-denied   { background: #FEE2E2; color: #991B1B; }
+  .notif-default  { background: #FEF3C7; color: #92400E; }
+
+  .recurrence-options {
+    display: none;
+    margin-top: 10px;
+    padding: 15px;
+    background: #F3F4F6;
+    border-radius: 8px;
+  }
+
+  .recurrence-options.active {
+    display: block;
+  }
+
+  .checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .checkbox-group input[type="checkbox"] {
+    width: auto;
+  }
+
+  @media (max-width: 768px) {
+    .header h1 {
+      font-size: 1.8em;
+    }
+
+    .form-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .container {
+      border-radius: 0;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <!-- EN-TÊTE -->
+  <div class="header">
+    <h1>📅 Mon Agenda Pro</h1>
+    <p>Organisez votre vie simplement</p>
+    <div class="header-buttons">
+      <button class="btn btn-secondary" id="gotoToday">📍 Aujourd'hui</button>
+      <button class="btn btn-secondary" id="exportBtn">💾 Exporter</button>
+      <button class="btn btn-secondary" id="importBtn">📥 Importer</button>
+      <button class="btn btn-secondary" id="clearAllBtn">🗑️ Tout effacer</button>
+      <button class="btn btn-warning"   id="testNotification">🔔 Test Notif</button>
+    </div>
+  </div>
+
+  <!-- BANDEAU NOTIFICATIONS -->
+  <div id="notificationBanner" class="notification-banner hidden">
+    <span>🔔 Activez les notifications pour recevoir des rappels d'événements.</span>
+    <button class="btn btn-primary" id="enableNotifications">Activer</button>
+  </div>
+
+  <!-- FORMULAIRE -->
+  <div class="form-section">
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="date">Date *</label>
+        <input type="date" id="date" required>
+      </div>
+      <div class="form-group">
+        <label for="time">Heure *</label>
+        <input type="time" id="time" required>
+      </div>
+      <div class="form-group">
+        <label for="category">Catégorie</label>
+        <select id="category">
+          <option value="travail">💼 Travail</option>
+          <option value="personnel">👤 Personnel</option>
+          <option value="sante">🏥 Santé</option>
+          <option value="loisirs">🎨 Loisirs</option>
+          <option value="autre">📌 Autre</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="priority">Priorité</label>
+        <select id="priority">
+          <option value="basse">🟢 Basse</option>
+          <option value="moyenne" selected>🟡 Moyenne</option>
+          <option value="haute">🔴 Haute</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:15px;">
+      <label for="note">Description *</label>
+      <textarea id="note" placeholder="Décrivez votre événement..." required></textarea>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="notifyMe">
+      <label for="notifyMe">🔔 Me notifier 15 minutes avant</label>
+    </div>
+
+    <div class="checkbox-group">
+      <input type="checkbox" id="recurring">
+      <label for="recurring">🔁 Événement récurrent</label>
+    </div>
+
+    <div id="recurrenceOptions" class="recurrence-options">
+      <div class="form-group" style="margin-bottom:10px;">
+        <label for="recurrenceType">Répéter</label>
+        <select id="recurrenceType">
+          <option value="daily">Chaque jour</option>
+          <option value="weekly">Chaque semaine</option>
+          <option value="monthly">Chaque mois</option>
+          <option value="annually">Chaque année 🕯️</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="recurrenceEnd">Jusqu'au</label>
+        <input type="date" id="recurrenceEnd">
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button class="btn btn-primary"   id="addBtn">➕ Ajouter</button>
+      <button class="btn btn-success hidden" id="updateBtn">✓ Mettre à jour</button>
+      <button class="btn btn-secondary hidden" id="cancelEditBtn">✗ Annuler</button>
+    </div>
+  </div>
+
+  <!-- LISTE DES ÉVÉNEMENTS -->
+  <div class="events-section">
+    <div class="stats" id="stats"></div>
+
+    <div class="search-filter">
+      <input type="text" id="searchInput" placeholder="🔍 Rechercher un événement...">
+      <select id="filterCategory">
+        <option value="">Toutes les catégories</option>
+        <option value="travail">💼 Travail</option>
+        <option value="personnel">👤 Personnel</option>
+        <option value="sante">🏥 Santé</option>
+        <option value="loisirs">🎨 Loisirs</option>
+        <option value="autre">📌 Autre</option>
+      </select>
+      <select id="filterPriority">
+        <option value="">Toutes les priorités</option>
+        <option value="haute">🔴 Haute</option>
+        <option value="moyenne">🟡 Moyenne</option>
+        <option value="basse">🟢 Basse</option>
+      </select>
+    </div>
+
+    <div id="events"></div>
+  </div>
+</div>
+
+<!-- MODAL CONFIRMATION -->
+<div id="confirmModal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">Confirmation</div>
+    <p id="confirmMessage"></p>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="confirmCancel">Annuler</button>
+      <button class="btn btn-danger"    id="confirmOk">Confirmer</button>
+    </div>
+  </div>
+</div>
+
+<!-- INPUT FILE CACHÉ (import) -->
+<input type="file" id="importFile" accept=".json" style="display:none;">
+
 <script>
-    function scheduleNotifications() {
-        // Logic to schedule notifications
+  // ─────────────────────────────────────────────
+  //  ÉTAT DE L'APPLICATION
+  // ─────────────────────────────────────────────
+  let events = JSON.parse(localStorage.getItem('agenda') || '[]');
+  let editingIndex = null;
+  let notificationTimeouts = {};
+
+  // ─────────────────────────────────────────────
+  //  SERVICE WORKER
+  // ─────────────────────────────────────────────
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('Service Worker enregistré:', reg.scope))
+        .catch(err => console.warn('Erreur Service Worker:', err));
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  //  INITIALISATION
+  // ─────────────────────────────────────────────
+  document.addEventListener('DOMContentLoaded', () => {
+    setDefaultDate();
+    checkNotificationPermission();
+    render();
+    setupEventListeners();
+    scheduleNotifications();
+  });
+
+  // ─────────────────────────────────────────────
+  //  ÉCOUTEURS D'ÉVÉNEMENTS
+  // ─────────────────────────────────────────────
+  function setupEventListeners() {
+    document.getElementById('addBtn').onclick          = addEvent;
+    document.getElementById('updateBtn').onclick       = updateEvent;
+    document.getElementById('cancelEditBtn').onclick   = cancelEdit;
+    document.getElementById('gotoToday').onclick       = scrollToToday;
+    document.getElementById('exportBtn').onclick       = exportData;
+    document.getElementById('importBtn').onclick       = () => document.getElementById('importFile').click();
+    document.getElementById('importFile').onchange     = importData;
+    document.getElementById('clearAllBtn').onclick     = clearAll;
+    document.getElementById('testNotification').onclick = testNotification;
+    document.getElementById('enableNotifications').onclick = requestNotificationPermission;
+    document.getElementById('searchInput').oninput     = render;
+    document.getElementById('filterCategory').onchange = render;
+    document.getElementById('filterPriority').onchange = render;
+    document.getElementById('recurring').onchange      = toggleRecurrence;
+    document.getElementById('confirmCancel').onclick   = () => closeModal('confirmModal');
+  }
+
+  // ─────────────────────────────────────────────
+  //  DATE PAR DÉFAUT
+  // ─────────────────────────────────────────────
+  function setDefaultDate() {
+    const today = new Date();
+    document.getElementById('date').value = today.toISOString().split('T')[0];
+    document.getElementById('time').value =
+      String(today.getHours()).padStart(2, '0') + ':' +
+      String(today.getMinutes()).padStart(2, '0');
+  }
+
+  // ─────────────────────────────────────────────
+  //  GESTION DES NOTIFICATIONS
+  // ─────────────────────────────────────────────
+  function checkNotificationPermission() {
+    if (!('Notification' in window)) return;
+
+    const banner = document.getElementById('notificationBanner');
+    if (Notification.permission === 'denied') {
+      banner.classList.add('hidden');
+    } else if (Notification.permission === 'default') {
+      banner.classList.remove('hidden');
+    } else {
+      // granted
+      banner.classList.add('hidden');
+    }
+  }
+
+  async function requestNotificationPermission() {
+    if (!('Notification' in window)) {
+      alert('Ce navigateur ne supporte pas les notifications.');
+      return;
     }
 
-    function addEvent(event) {
-        // Logic to add an event
-        scheduleNotifications(); // Call scheduleNotifications after adding event
+    const permission = await Notification.requestPermission();
+    checkNotificationPermission();
+
+    if (permission === 'granted') {
+      new Notification('✅ Notifications activées !', {
+        body: 'Vous recevrez des rappels pour vos événements.',
+        icon: '192x192.png'
+      });
+      scheduleNotifications();
+    } else {
+      alert('Les notifications ont été refusées. Vous pouvez les réactiver depuis les paramètres de votre navigateur.');
+    }
+  }
+
+  function testNotification() {
+    if (!('Notification' in window)) {
+      alert('Ce navigateur ne supporte pas les notifications.');
+      return;
+    }
+    if (Notification.permission === 'granted') {
+      new Notification('🔔 Test Agenda Pro', {
+        body: 'Les notifications fonctionnent correctement !',
+        icon: '192x192.png'
+      });
+    } else if (Notification.permission === 'default') {
+      if (confirm('Les notifications ne sont pas encore activées. Voulez-vous les activer maintenant ?')) {
+        requestNotificationPermission();
+      }
+    } else {
+      alert('Les notifications sont bloquées. Veuillez les autoriser dans les paramètres de votre navigateur.');
+    }
+  }
+
+  function scheduleNotifications() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+
+    // Annuler les anciens timeouts
+    Object.values(notificationTimeouts).forEach(id => clearTimeout(id));
+    notificationTimeouts = {};
+
+    const now = new Date();
+
+    events.forEach(ev => {
+      if (!ev.notify) return;
+
+      const eventDate  = new Date(ev.date + 'T' + ev.time);
+      const notifyTime = new Date(eventDate.getTime() - 15 * 60 * 1000); // 15 min avant
+
+      if (notifyTime <= now) return; // Déjà passé
+
+      const delay = notifyTime.getTime() - now.getTime();
+      if (delay > 2147483647) return; // Trop loin (limite JS setTimeout ~24j)
+
+      notificationTimeouts[ev.id] = setTimeout(() => {
+        new Notification('⏰ Rappel : ' + ev.note, {
+          body: 'Cet événement commence à ' + ev.time,
+          icon: '192x192.png',
+          tag: 'event-' + ev.id,
+          requireInteraction: true
+        });
+      }, delay);
+    });
+  }
+
+  // ─────────────────────────────────────────────
+  //  RÉCURRENCE
+  // ─────────────────────────────────────────────
+  function toggleRecurrence() {
+    document.getElementById('recurrenceOptions')
+      .classList.toggle('active', document.getElementById('recurring').checked);
+  }
+
+  function generateRecurringEvents(baseEvent, type, endDate) {
+    const results = [];
+    let current = new Date(baseEvent.date + 'T00:00:00');
+    const end    = new Date(endDate + 'T00:00:00');
+
+    while (current <= end) {
+      results.push({
+        ...baseEvent,
+        id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+        date: current.toISOString().split('T')[0]
+      });
+
+      if      (type === 'daily')    current.setDate(current.getDate() + 1);
+      else if (type === 'weekly')   current.setDate(current.getDate() + 7);
+      else if (type === 'monthly')  current.setMonth(current.getMonth() + 1);
+      else if (type === 'annually') current.setFullYear(current.getFullYear() + 1);
+    }
+    return results;
+  }
+
+  // ─────────────────────────────────────────────
+  //  AJOUTER UN ÉVÉNEMENT
+  // ─────────────────────────────────────────────
+  function addEvent() {
+    const date     = document.getElementById('date').value;
+    const time     = document.getElementById('time').value;
+    const note     = document.getElementById('note').value.trim();
+    const category = document.getElementById('category').value;
+    const priority = document.getElementById('priority').value;
+    const notify   = document.getElementById('notifyMe').checked;
+    const recurring = document.getElementById('recurring').checked;
+
+    if (!date || !time || !note) {
+      alert('Veuillez remplir tous les champs obligatoires !');
+      return;
     }
 
-    function updateEvent(event) {
-        // Logic to update an event
-        scheduleNotifications(); // Call scheduleNotifications after updating event
+    if (notify && Notification.permission !== 'granted') {
+      if (confirm('Les notifications ne sont pas activées. Voulez-vous les activer pour recevoir ce rappel ?')) {
+        requestNotificationPermission();
+      }
     }
 
-    function checkPermission() {
-        // Updated permission check logic
-        if (/* your logic here */) {
-            return true; // Permission granted
-        } else {
-            return false; // Permission denied
-        }
+    const newEvent = {
+      id: Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+      date, time, note, category, priority, notify,
+      createdAt: new Date().toISOString()
+    };
+
+    if (recurring) {
+      const recurrenceType = document.getElementById('recurrenceType').value;
+      const recurrenceEnd  = document.getElementById('recurrenceEnd').value;
+      if (!recurrenceEnd) {
+        alert('Veuillez spécifier une date de fin pour l\'événement récurrent !');
+        return;
+      }
+      events.push(...generateRecurringEvents(newEvent, recurrenceType, recurrenceEnd));
+    } else {
+      events.push(newEvent);
     }
+
+    saveAndRender();
+    clearForm();
+    scrollToEvent(newEvent.id);
+  }
+
+  // ─────────────────────────────────────────────
+  //  MODIFIER UN ÉVÉNEMENT
+  // ─────────────────────────────────────────────
+  function editEvent(index) {
+    editingIndex = index;
+    const ev = events[index];
+
+    document.getElementById('date').value     = ev.date;
+    document.getElementById('time').value     = ev.time;
+    document.getElementById('note').value     = ev.note;
+    document.getElementById('category').value = ev.category || 'autre';
+    document.getElementById('priority').value = ev.priority || 'moyenne';
+    document.getElementById('notifyMe').checked = ev.notify || false;
+    document.getElementById('recurring').checked = false;
+    document.getElementById('recurrenceOptions').classList.remove('active');
+
+    document.getElementById('addBtn').classList.add('hidden');
+    document.getElementById('updateBtn').classList.remove('hidden');
+    document.getElementById('cancelEditBtn').classList.remove('hidden');
+
+    document.getElementById('date').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function updateEvent() {
+    if (editingIndex === null) return;
+
+    const date     = document.getElementById('date').value;
+    const time     = document.getElementById('time').value;
+    const note     = document.getElementById('note').value.trim();
+    const category = document.getElementById('category').value;
+    const priority = document.getElementById('priority').value;
+    const notify   = document.getElementById('notifyMe').checked;
+
+    if (!date || !time || !note) {
+      alert('Veuillez remplir tous les champs obligatoires !');
+      return;
+    }
+
+    events[editingIndex] = {
+      ...events[editingIndex],
+      date, time, note, category, priority, notify,
+      updatedAt: new Date().toISOString()
+    };
+
+    saveAndRender();
+    cancelEdit();
+  }
+
+  function cancelEdit() {
+    editingIndex = null;
+    clearForm();
+    document.getElementById('addBtn').classList.remove('hidden');
+    document.getElementById('updateBtn').classList.add('hidden');
+    document.getElementById('cancelEditBtn').classList.add('hidden');
+  }
+
+  // ─────────────────────────────────────────────
+  //  SUPPRIMER / DUPLIQUER
+  // ─────────────────────────────────────────────
+  function removeEvent(index) {
+    showConfirmModal('Êtes-vous sûr de vouloir supprimer cet événement ?', () => {
+      events.splice(index, 1);
+      saveAndRender();
+    });
+  }
+
+  function duplicateEvent(index) {
+    const ev = { ...events[index] };
+    ev.id = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    ev.createdAt = new Date().toISOString();
+    delete ev.updatedAt;
+    events.push(ev);
+    saveAndRender();
+    scrollToEvent(ev.id);
+  }
+
+  // ─────────────────────────────────────────────
+  //  RENDU
+  // ─────────────────────────────────────────────
+  function render() {
+    renderStats();
+    renderEvents();
+  }
+
+  function renderStats() {
+    const now      = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    const total    = events.length;
+    const today    = events.filter(ev => ev.date === todayStr).length;
+    const upcoming = events.filter(ev => new Date(ev.date + 'T' + ev.time) > now).length;
+    const past     = total - upcoming;
+
+    document.getElementById('stats').innerHTML = `
+      <div class="stat-card"><div class="stat-number">${total}</div><div class="stat-label">Total</div></div>
+      <div class="stat-card"><div class="stat-number">${today}</div><div class="stat-label">Aujourd'hui</div></div>
+      <div class="stat-card"><div class="stat-number">${upcoming}</div><div class="stat-label">À venir</div></div>
+      <div class="stat-card"><div class="stat-number">${past}</div><div class="stat-label">Passés</div></div>
+    `;
+  }
+
+  function renderEvents() {
+    const container  = document.getElementById('events');
+    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+    const filterCat  = document.getElementById('filterCategory').value;
+    const filterPrio = document.getElementById('filterPriority').value;
+
+    let filtered = events.filter(ev => {
+      return ev.note.toLowerCase().includes(searchTerm) &&
+             (!filterCat  || ev.category === filterCat) &&
+             (!filterPrio || ev.priority === filterPrio);
+    });
+
+    if (filtered.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <h3>Aucun événement trouvé</h3>
+          <p>Commencez par ajouter un événement !</p>
+        </div>`;
+      return;
+    }
+
+    // Tri chronologique
+    filtered.sort((a, b) =>
+      new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time)
+    );
+
+    const now      = new Date();
+    const todayStr = now.toISOString().split('T')[0];
+    let currentDate = null;
+    let html = '';
+
+    const categoryIcons = { travail:'💼', personnel:'👤', sante:'🏥', loisirs:'🎨', autre:'📌' };
+
+    filtered.forEach(ev => {
+      const originalIndex = events.indexOf(ev);
+
+      if (ev.date !== currentDate) {
+        currentDate = ev.date;
+        const isToday = ev.date === todayStr;
+        html += `<div class="date-separator ${isToday ? 'today' : ''}"
+                      ${isToday ? 'data-date="today"' : ''}>
+                   ${formatDate(ev.date, todayStr)}
+                 </div>`;
+      }
+
+      const eventDate = new Date(ev.date + 'T' + ev.time);
+      const statusClass = ev.date === todayStr ? 'today' : (eventDate < now ? 'past' : 'future');
+
+      html += `
+        <div class="event ${statusClass}" data-id="${ev.id}">
+          <div class="priority-badge priority-${ev.priority || 'moyenne'}"></div>
+          <div class="event-header">
+            <div class="event-time">${ev.time}</div>
+            <span class="event-category category-${ev.category || 'autre'}">
+              ${categoryIcons[ev.category] || '📌'} ${ev.category || 'autre'}
+            </span>
+          </div>
+          <div class="event-note">${escapeHtml(ev.note)}</div>
+          ${ev.notify ? '<div style="font-size:0.9em;color:#6B7280;margin-top:5px;">🔔 Notification programmée</div>' : ''}
+          <div class="event-actions">
+            <button class="btn btn-primary"   onclick="editEvent(${originalIndex})">✏️ Modifier</button>
+            <button class="btn btn-secondary" onclick="duplicateEvent(${originalIndex})">📋 Dupliquer</button>
+            <button class="btn btn-danger"    onclick="removeEvent(${originalIndex})">🗑️ Supprimer</button>
+          </div>
+        </div>`;
+    });
+
+    container.innerHTML = html;
+  }
+
+  // ─────────────────────────────────────────────
+  //  UTILITAIRES
+  // ─────────────────────────────────────────────
+  function formatDate(dateStr, todayStr) {
+    if (dateStr === todayStr) return "📅 Aujourd'hui";
+
+    const today    = new Date(todayStr + 'T00:00:00');
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+
+    if (dateStr === tomorrow.toISOString().split('T')[0]) return '📅 Demain';
+
+    return '📅 ' + new Date(dateStr + 'T00:00:00').toLocaleDateString('fr-FR', {
+      weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    });
+  }
+
+  function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+  }
+
+  function saveAndRender() {
+    localStorage.setItem('agenda', JSON.stringify(events));
+    render();
+    scheduleNotifications();
+  }
+
+  function clearForm() {
+    document.getElementById('note').value      = '';
+    document.getElementById('category').value  = 'travail';
+    document.getElementById('priority').value  = 'moyenne';
+    document.getElementById('notifyMe').checked  = false;
+    document.getElementById('recurring').checked = false;
+    document.getElementById('recurrenceOptions').classList.remove('active');
+    document.getElementById('recurrenceEnd').value = '';
+    setDefaultDate();
+  }
+
+  function scrollToToday() {
+    const el = document.querySelector('[data-date="today"]');
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    else alert("Aucun événement prévu aujourd'hui.");
+  }
+
+  function scrollToEvent(eventId) {
+    setTimeout(() => {
+      const el = document.querySelector(`[data-id="${eventId}"]`);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+  }
+
+  // ─────────────────────────────────────────────
+  //  EXPORT / IMPORT
+  // ─────────────────────────────────────────────
+  function exportData() {
+    const blob = new Blob([JSON.stringify(events, null, 2)], { type: 'application/json' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'agenda_export_' + new Date().toISOString().split('T')[0] + '.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function importData(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const imported = JSON.parse(ev.target.result);
+        if (!Array.isArray(imported)) throw new Error('Format invalide');
+        showConfirmModal(
+          `Voulez-vous importer ${imported.length} événement(s) ? Cela remplacera vos données actuelles.`,
+          () => { events = imported; saveAndRender(); alert('Import réussi !'); }
+        );
+      } catch {
+        alert("Erreur lors de l'import : fichier JSON invalide.");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
+  }
+
+  // ─────────────────────────────────────────────
+  //  TOUT EFFACER
+  // ─────────────────────────────────────────────
+  function clearAll() {
+    if (events.length === 0) { alert('Aucun événement à supprimer.'); return; }
+    showConfirmModal(
+      `Êtes-vous sûr de vouloir supprimer TOUS les ${events.length} événements ? Cette action est irréversible.`,
+      () => { events = []; saveAndRender(); alert('Tous les événements ont été supprimés.'); }
+    );
+  }
+
+  // ─────────────────────────────────────────────
+  //  MODAL DE CONFIRMATION
+  // ─────────────────────────────────────────────
+  function showConfirmModal(message, onConfirm) {
+    document.getElementById('confirmMessage').textContent = message;
+    document.getElementById('confirmModal').classList.add('active');
+    document.getElementById('confirmOk').onclick = () => { onConfirm(); closeModal('confirmModal'); };
+  }
+
+  function closeModal(id) {
+    document.getElementById(id).classList.remove('active');
+  }
 </script>
+</body>
+</html>

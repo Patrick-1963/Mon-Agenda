@@ -35,24 +35,14 @@
       "short_name": "Ajouter",
       "description": "Ajouter rapidement un nouvel événement",
       "url": "agenda.html#add",
-      "icons": [
-        {
-          "src": "192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "192x192.png", "sizes": "192x192" }]
     },
     {
       "name": "Voir aujourd'hui",
       "short_name": "Aujourd'hui",
       "description": "Voir les événements d'aujourd'hui",
       "url": "agenda.html#today",
-      "icons": [
-        {
-          "src": "192x192.png",
-          "sizes": "192x192"
-        }
-      ]
+      "icons": [{ "src": "192x192.png", "sizes": "192x192" }]
     }
   ]
 }
