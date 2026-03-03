@@ -406,6 +406,54 @@
     width: auto;
   }
 </style>
+<script>
+  // Initialiser le Service Worker et demander la permission
+  window.addEventListener('load', () => {
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => {
+          console.log('Service Worker enregistré:', registration);
+          
+          // Demander la permission pour les notifications
+          if ('Notification' in window) {
+            Notification.requestPermission().then(permission => {
+              console.log('Permission notifications:', permission);
+            });
+          }
+        })
+        .catch(error => console.error('Erreur SW:', error));
+    }
+  });
+
+  // Fonction pour envoyer une notification locale
+  function sendLocalNotification(title, options = {}) {
+    if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {
+      navigator.serviceWorker.controller.postMessage({
+        type: 'SHOW_NOTIFICATION',
+        title: title,
+        options: {
+          body: options.body || '',
+          icon: '192x192.png',
+          badge: '192x192.png',
+          tag: 'agenda',
+          requireInteraction: true,
+          ...options
+        }
+      });
+    } else if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification(title, {
+        body: options.body || '',
+        icon: '192x192.png',
+        ...options
+      });
+    }
+  }
+
+  // Exemple : envoyer une notification après 3 secondes (pour tester)
+  // setTimeout(() => {
+  //   sendLocalNotification('Test Agenda', { body: 'Ceci est un test de notification' });
+  // }, 3000);
+</script>
 </head>
 <body>
 
@@ -419,6 +467,7 @@
       <button class="btn btn-secondary" id="importBtn">📥 Importer</button>
       <button class="btn btn-secondary" id="clearAllBtn">🗑️ Tout effacer</button>
       <button class="btn btn-secondary" id="testNotification">🔔 Test Notification</button>
+      <button id="askNotification">Demander les notifications</button>
     </div>
   </div>
 
@@ -1080,7 +1129,17 @@
     document.getElementById(modalId).classList.remove("active");
   }
 
-</script>
 
+  document.getElementById('askNotification').addEventListener('click', function() {
+    if ('Notification' in window) {
+      Notification.requestPermission().then(function(result) {
+        console.log('Permission pour les notifications :', result);
+        if (result === 'granted') {
+          alert('Permission accordée pour les notifications !');
+        }
+      });
+    }
+  });
+</script>
 </body>
 </html>

@@ -70,38 +70,28 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// Gestion des notifications push (pour extension future)
-self.addEventListener('push', event => {
+// Écouter les événements push pour afficher une notification
+self.addEventListener('push', function(event) {
+  const data = event.data.json();
   const options = {
-    body: event.data ? event.data.text() : 'Rappel d\'événement',
-    icon: 'agenda.webp',
-    badge: 'agenda.webp',
-    vibrate: [200, 100, 200],
-    tag: 'agenda-notification'
+    body: data.body,
+    icon: '192x192.png',
+    badge: '192x192.png',
+    tag: 'agenda-notification',
+    requireInteraction: true
   };
 
   event.waitUntil(
-    self.registration.showNotification('Mon Agenda Pro', options)
+    self.registration.showNotification(data.title, options)
   );
 });
 
-// Gestion du clic sur la notification
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  
-  event.waitUntil(
-    clients.openWindow('agenda.html')
-  );
-});
-
-// Synchronisation en arrière-plan (pour extension future)
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-events') {
-    event.waitUntil(syncEvents());
+// Gérer les messages pour les notifications locales
+self.addEventListener('message', event => {
+  if (event.data.type === 'SHOW_NOTIFICATION') {
+    self.registration.showNotification(
+      event.data.title,
+      event.data.options
+    );
   }
 });
-
-function syncEvents() {
-  // Logique de synchronisation future
-  return Promise.resolve();
-}
