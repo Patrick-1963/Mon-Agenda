@@ -744,7 +744,13 @@ function duplicateEvent(index) {
 // ═══════════════════════════════════════════
 //  RENDU
 // ═══════════════════════════════════════════
-function render() { renderStats(); renderEvents(); }
+function render() {
+  renderStats(); renderEvents();
+  if (typeof currentView !== 'undefined') {
+    if (currentView === 'cal')  renderCalendar();
+    if (currentView === 'week') renderWeek();
+  }
+}
 
 function renderStats() {
   const now = new Date(), ts = now.toISOString().split('T')[0];
@@ -1169,16 +1175,6 @@ function removeEventFromModal(idx, ds) {
     if (currentView === 'cal')  renderCalendar();
     if (currentView === 'week') renderWeek();
   });
-}
-
-// ═══════════════════════════════════════════
-//  PATCH: render() déclenche aussi la vue active
-// ═══════════════════════════════════════════
-const _origRender = render;
-function render() {
-  _origRender();
-  if (currentView === 'cal')  renderCalendar();
-  if (currentView === 'week') renderWeek();
 }
 
 // ─── fin des ajouts ───
