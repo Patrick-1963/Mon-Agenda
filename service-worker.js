@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agenda-pro-v7';
+const CACHE_NAME = 'agenda-pro-v8';
 const urlsToCache = [
   'agenda.html',
   'manifest.json',
@@ -94,4 +94,5 @@ self.addEventListener('notificationclick', event => {
       if (clients.openWindow) return clients.openWindow('agenda.html');
     })
   );
+
 });
