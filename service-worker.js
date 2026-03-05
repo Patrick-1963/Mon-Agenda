@@ -1,4 +1,4 @@
-const CACHE_NAME = 'agenda-pro-v11';
+const CACHE_NAME = 'agenda-pro-v12';
 const urlsToCache = [
   'agenda.html',
   'manifest.json',

@@ -910,6 +910,7 @@ function showConfirmModal(msg, cb) {
   document.getElementById('confirmModal').classList.add('active');
   document.getElementById('confirmOk').onclick=()=>{cb();closeModal('confirmModal');};
 }
+function closeModal(id){document.getElementById(id).classList.remove('active');}
 // ═══════════════════════════════════════════
 //  GESTION DES VUES
 // ═══════════════════════════════════════════
